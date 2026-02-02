@@ -14,6 +14,44 @@
     justify-content: center;
     align-items: center;
     font-family: "Segoe UI", sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Floating love symbols animation */
+  .love-symbols {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  .love {
+    position: absolute;
+    font-size: 24px;
+    color: transparent;
+    -webkit-text-stroke: 1px black;
+    text-stroke: 1px black;
+    opacity: 0.7;
+    animation: floatUp linear infinite;
+  }
+  
+  @keyframes floatUp {
+    0% {
+      transform: translateY(100vh) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.7;
+    }
+    90% {
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateY(-100px) rotate(360deg);
+      opacity: 0;
+    }
   }
 
   .card {
@@ -24,15 +62,16 @@
     box-shadow: 0 20px 40px rgba(0,0,0,0.15);
     width: 90%;
     max-width: 420px;
+    z-index: 10;
+    position: relative;
   }
 
   h1 {
-  font-size: 22px;      /* Bigger text */
-  line-height: 1.4;     /* More space between lines */
-  margin-bottom: 20px;
-  color: #333;
-}
-
+    font-size: 24px;
+    line-height: 1.4;
+    margin-bottom: 20px;
+    color: #333;
+  }
 
   .buttons {
     position: relative;
@@ -45,33 +84,38 @@
     border-radius: 30px;
     border: none;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.3s ease;
+    position: absolute;
   }
 
-  /* YES button – slightly left */
+  /* YES button */
   #yes {
     background: #ff4d6d;
     color: white;
-    position: absolute;
     left: 70px;
     top: 20px;
+    box-shadow: 0 4px 15px rgba(255,77,109,0.3);
   }
 
-  /* YES pop effect */
+  /* YES hover effect */
   #yes:hover {
     transform: scale(1.15);
-    box-shadow: 0 10px 20px rgba(255,77,109,0.4);
-    document.getElementById("bgMusic").play();
-
+    box-shadow: 0 10px 25px rgba(255,77,109,0.5);
   }
 
-  /* NO button – default on right */
+  /* NO button - with smooth transition */
   #no {
     background: #eee;
     color: #333;
-    position: absolute;
     right: 70px;
     top: 20px;
+    transition: left 0.5s ease, top 0.5s ease, transform 0.3s ease;
+    will-change: left, top;
+  }
+  
+  #no:hover {
+    transform: scale(1.05);
+    background: #ddd;
   }
 </style>
 </head>
@@ -79,12 +123,15 @@
 <body>
 
 <audio id="bgMusic" loop>
-  <source src="love.mp3" type="audio/mpeg">
+  <source src="love.mp3">
+  Your browser does not support the audio element.
 </audio>
 
+<!-- Container for floating love symbols -->
+<div class="love-symbols" id="loveSymbols"></div>
 
 <div class="card" id="card">
-  <h1>HEY DEVIKA! (My Maggieee) <br>WILL YOU BE MYY VALENTINEEE?💖</h1>
+  <h1>DEVIKA! (My Maggieeee) <br>WILL YOU BE MY VALENTINE?💖</h1>
 
   <div class="buttons" id="box">
     <button id="yes">YES</button>
@@ -95,6 +142,38 @@
 <script>
 const noBtn = document.getElementById("no");
 const box = document.getElementById("box");
+const loveSymbolsContainer = document.getElementById("loveSymbols");
+const bgMusic = document.getElementById("bgMusic");
+
+// Create floating love symbols
+function createLoveSymbols() {
+  const symbols = ['❤️', '💖', '💕', '💗', '💓', '💞'];
+  
+  for (let i = 0; i < 15; i++) {
+    const love = document.createElement('div');
+    love.classList.add('love');
+    love.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    
+    // Random position
+    const left = Math.random() * 100;
+    love.style.left = `${left}vw`;
+    
+    // Random size
+    const size = 20 + Math.random() * 30;
+    love.style.fontSize = `${size}px`;
+    
+    // Random animation duration and delay
+    const duration = 15 + Math.random() * 25;
+    const delay = Math.random() * 5;
+    love.style.animation = `floatUp ${duration}s linear ${delay}s infinite`;
+    
+    loveSymbolsContainer.appendChild(love);
+  }
+}
+
+// Smooth movement for NO button
+let isMoving = false;
+let moveTimeout = null;
 
 box.addEventListener("mousemove", (e) => {
   const boxRect = box.getBoundingClientRect();
@@ -108,36 +187,88 @@ box.addEventListener("mousemove", (e) => {
 
   const distance = Math.hypot(mouseX - btnX, mouseY - btnY);
 
-  // ONLY move when cursor is very close
-  if (distance < 80) {
+  // Move when cursor is close (80px threshold)
+  if (distance < 80 && !isMoving) {
+    isMoving = true;
+    
+    // Clear any pending timeout
+    if (moveTimeout) clearTimeout(moveTimeout);
+    
     const maxX = box.clientWidth - noBtn.offsetWidth;
     const maxY = box.clientHeight - noBtn.offsetHeight;
 
-    const x = Math.random() * maxX;
-    const y = Math.random() * maxY;
+    // Calculate new position away from cursor
+    let newX, newY;
+    
+    // Determine which direction to move (away from cursor)
+    if (mouseX > btnX) {
+      newX = Math.max(0, Math.random() * (maxX / 2)); // Move left
+    } else {
+      newX = Math.min(maxX, (maxX / 2) + Math.random() * (maxX / 2)); // Move right
+    }
+    
+    if (mouseY > btnY) {
+      newY = Math.max(0, Math.random() * (maxY / 2)); // Move up
+    } else {
+      newY = Math.min(maxY, (maxY / 2) + Math.random() * (maxY / 2)); // Move down
+    }
 
-    noBtn.style.left = x + "px";
-    noBtn.style.top = y + "px";
+    // Apply smooth transition
+    noBtn.style.transition = "left 0.5s ease, top 0.5s ease";
+    noBtn.style.left = newX + "px";
+    noBtn.style.top = newY + "px";
     noBtn.style.right = "auto";
+
+    // Reset isMoving after animation completes
+    setTimeout(() => {
+      isMoving = false;
+    }, 500);
+    
+    // Set timeout to prevent rapid movements
+    moveTimeout = setTimeout(() => {}, 300);
   }
 });
 
+// YES button click handler
 document.getElementById("yes").addEventListener("click", () => {
+  // Play music if available
+  if (bgMusic) {
+    bgMusic.play().catch(e => {
+      console.log("Audio play failed:", e);
+      // If autoplay is blocked, show a message
+      alert("Click anywhere on the page to enable music!");
+    });
+  }
+  
+  // Update card content
   document.getElementById("card").innerHTML = `
     <h1>💖 YEYEYE!!! 💖</h1>
-    <p style="font-size:17px;">BEST DECISION EVER 😘</p>
+    <p style="font-size:17px; color:#ff4d6d; margin: 10px 0;">BEST DECISION EVER 😘</p>
 
     <img 
-      src="hug.gif" alt="Love gif"
-      style="width:100%; border-radius:15px; margin:20px 0;"
+      src="hug.gif" 
+      alt="Love gif"
+      style="width:100%; border-radius:15px; margin:20px 0; max-height:200px; object-fit:cover;"
     >
 
-    <p style="font-size:24px;font-weight:bold;">I LOVE YOU TO INFINITY ❤️</p>
-  `;
+    <p style="font-size:24px;font-weight:bold;color:#ff4d6d; margin-top:15px;">I LOVE YOU TO INFINITY ❤️</p>
+    
+      `;
+  
+  // Add more love symbols on success
+  createLoveSymbols();
 });
+
+// Initialize love symbols on page load
+createLoveSymbols();
+
+// Enable audio on first user interaction (to bypass autoplay restrictions)
+document.addEventListener('click', function() {
+  if (bgMusic.paused) {
+    bgMusic.play().catch(e => console.log("Audio play failed on user interaction"));
+  }
+}, { once: true });
 </script>
 
 </body>
 </html>
-
-
