@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valentine ❤️</title>
+
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(135deg, #f7c1d9, #fce4ec);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Segoe UI", sans-serif;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.95);
+    padding: 40px 30px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    width: 90%;
+    max-width: 420px;
+  }
+
+  h1 {
+  font-size: 24px;      /* Bigger text */
+  line-height: 1.4;     /* More space between lines */
+  margin-bottom: 20px;
+  color: #333;
+}
+
+
+  .buttons {
+    position: relative;
+    height: 120px;
+  }
+
+  button {
+    padding: 14px 32px;
+    font-size: 18px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  /* YES button – slightly left */
+  #yes {
+    background: #ff4d6d;
+    color: white;
+    position: absolute;
+    left: 70px;
+    top: 20px;
+  }
+
+  /* YES pop effect */
+  #yes:hover {
+    transform: scale(1.15);
+    box-shadow: 0 10px 20px rgba(255,77,109,0.4);
+    document.getElementById("bgMusic").play();
+
+  }
+
+  /* NO button – default on right */
+  #no {
+    background: #eee;
+    color: #333;
+    position: absolute;
+    right: 70px;
+    top: 20px;
+  }
+</style>
+</head>
+
+<body>
+
+<audio id="bgMusic" loop>
+  <source src="love.mp3" type="audio/mpeg">
+</audio>
+
+
+<div class="card" id="card">
+  <h1>DEVIKA! (My Maggieeee) <br>WILL YOU BE MY VALENTINE?💖</h1>
+
+  <div class="buttons" id="box">
+    <button id="yes">YES</button>
+    <button id="no">NO</button>
+  </div>
+</div>
+
+<script>
+const noBtn = document.getElementById("no");
+const box = document.getElementById("box");
+
+box.addEventListener("mousemove", (e) => {
+  const boxRect = box.getBoundingClientRect();
+  const btnRect = noBtn.getBoundingClientRect();
+
+  const mouseX = e.clientX;
+  const mouseY = e.clientY;
+
+  const btnX = btnRect.left + btnRect.width / 2;
+  const btnY = btnRect.top + btnRect.height / 2;
+
+  const distance = Math.hypot(mouseX - btnX, mouseY - btnY);
+
+  // ONLY move when cursor is very close
+  if (distance < 80) {
+    const maxX = box.clientWidth - noBtn.offsetWidth;
+    const maxY = box.clientHeight - noBtn.offsetHeight;
+
+    const x = Math.random() * maxX;
+    const y = Math.random() * maxY;
+
+    noBtn.style.left = x + "px";
+    noBtn.style.top = y + "px";
+    noBtn.style.right = "auto";
+  }
+});
+
+document.getElementById("yes").addEventListener("click", () => {
+  document.getElementById("card").innerHTML = `
+    <h1>💖 YEYEYE!!! 💖</h1>
+    <p style="font-size:17px;">BEST DECISION EVER 😘</p>
+
+    <img 
+      src="hug.gif" alt="Love gif"
+      style="width:100%; border-radius:15px; margin:20px 0;"
+    >
+
+    <p style="font-size:24px;font-weight:bold;">I LOVE YOU TO INFINITY ❤️</p>
+  `;
+});
+</script>
+
+</body>
+</html>
